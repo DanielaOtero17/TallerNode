@@ -1,4 +1,7 @@
+const debug = require("debug")("userscrud:usercontroller");
 const User = require("../model/users");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt")
 
 exports.create = async (req, res, next) => {
   const exist = await User.findOne({
@@ -9,7 +12,7 @@ exports.create = async (req, res, next) => {
     return res.status("409").send("User already exist");
   }
 
-  let encryptedPassword = await bcrypt.hash(req.body.password, 13);
+  let encryptedPassword = await bcrypt.hash(req.body.password, 10);
 
   let newUser = new User({
     firstname: req.body.firstname,
@@ -62,3 +65,37 @@ exports.destroy = (req, res, next) => {
     res.send("User deleted successfully");
   });
 };
+
+exports.login = async (req, res, next) => {
+    const { username, password } = req.body;
+  
+    if (!username || !password) {
+      res.status(400).send("Username and password are required");
+    }
+  
+    const user = await User.findOne({ username });
+  
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { _id, firstname, lastname, identification, photo, active } =
+        user;
+      const token = jwt.sign(
+        { user_id: user._id, username },
+        process.env.TOKENSECRET,
+        { expiresIn: "2h" }
+      );
+      user.token = token;
+      res.status(200).json({
+        _id,
+        username,
+        firstname,
+        lastname,
+        identification,
+        photo,
+        active,
+        token,
+      });
+    } else {
+      res.status(400).send("invalid credentials");
+    }
+  };
+  

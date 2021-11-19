@@ -24,11 +24,19 @@ exports.index = (req, res, next) => {
 };
 
 exports.show = (req, res, next) => {
-  Note.findById(req.params.id, (err, note) => {
-      if (err) 
-        return next(err);
-      res.send(note);
+    Note.findById(req.params.id)
+    .then((note) => {
+      if (note == null) {
+        res.status(404).send({ error: "Note not found" });
+      } else {
+        res.json(note);
+      }
     })
+    .catch((error) => {
+      debug(error);
+      res.status(500).send({ error: error.message });
+    });
+
 };
 
 exports.update = (req, res, next) => {
