@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const note_contoller = require("../controllers/notes")
 
-router.get('/', (req, res, next) => {
-  res.send('Hello products');
-});
+router.get("/", note_contoller.index)
+
+router.post("/" , note_contoller.create)
 
 module.exports = router;
 
