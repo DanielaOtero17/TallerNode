@@ -4,6 +4,7 @@ exports.create = (req, res, next) => {
   let newNt = new Note({
     title: req.body.title,
     comment: req.body.comment,
+    idUser: req.user.user_id
   })
 
   newNt.save((err) => {
