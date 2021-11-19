@@ -1,6 +1,16 @@
 const User = require("../model/users");
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
+  const exist = await User.findOne({
+    identification: req.body.identification,
+  });
+
+  if (exist) {
+    return res.status("409").send("User already exist");
+  }
+
+  let encryptedPassword = await bcrypt.hash(req.body.password, 13);
+
   let newUser = new User({
     firstname: req.body.firstname,
     lastname: req.body.lastname,
